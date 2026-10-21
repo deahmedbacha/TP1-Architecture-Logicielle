@@ -45,11 +45,73 @@
       <ul></ul>
       <p class="counter"></p>
     </div>
-    <script type="module">
-      import { TodoModel } from './TodoModel.js';
-      import { TodoView } from './TodoView.js';
-      import { TodoController } from './TodoController.js';
-      new TodoController(new TodoModel(), new TodoView(document.getElementById('app')));
-    </script>
+    
+<script type="module">
+  import { TodoViewModel } from './TodoViewModel.js';
+
+  const vm = new TodoViewModel();
+
+  const form = document.querySelector('form');
+  const titre = document.querySelector('input');
+  const liste = document.querySelector('ul');
+  const compteur = document.querySelector('.counter');
+  const erreur = document.querySelector('.error');
+  const boutonsFiltres = document.querySelectorAll('[data-filtre]');
+
+  // commandes : la vue transmet les actions
+
+  form.onsubmit = e => {
+    e.preventDefault();
+    vm.ajouter(titre.value);
+    titre.value = '';
+  };
+
+  boutonsFiltres.forEach(bouton => {
+    bouton.onclick = () => vm.changerFiltre(bouton.dataset.filtre);
+  });
+
+  // liaisons : la vue suit l'état du ViewModel
+
+  vm.erreur.subscribe(message => {
+    erreur.textContent = message;
+  });
+
+  vm.restantes.subscribe(nombre => {
+    compteur.textContent = `${nombre} tâche(s) à faire`;
+  });
+
+  vm.filtre.subscribe(nom => {
+    boutonsFiltres.forEach(bouton => {
+      bouton.classList.toggle('actif', bouton.dataset.filtre === nom);
+    });
+  });
+
+  vm.visibles.subscribe(todos => {
+    liste.innerHTML = '';
+
+    for (const t of todos) {
+      const li = document.createElement('li');
+
+      const label = document.createElement('label');
+      const checkbox = document.createElement('input');
+      checkbox.type = 'checkbox';
+      checkbox.checked = t.done;
+      checkbox.onchange = () => vm.basculer(t.id);
+
+      const span = document.createElement('span');
+      span.textContent = t.title;
+      span.className = t.done ? 'done' : '';
+
+      const supprimer = document.createElement('button');
+      supprimer.textContent = '✕';
+      supprimer.onclick = () => vm.supprimer(t.id);
+
+      label.append(checkbox, span);
+      li.append(label, ' ', supprimer);
+      liste.append(li);
+    }
+  });
+</script>
+
   </body>
 </html>

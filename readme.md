@@ -5,6 +5,7 @@
 - Yaya Mohamedhen
 - Ayadi Firas
 - Mohammed BENBRAHIM
+- Walid nabel
 
 ### comparaison mvc et mvvm
 
